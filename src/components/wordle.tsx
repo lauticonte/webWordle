@@ -6,6 +6,7 @@ import { GameStatus } from "./types";
 import { useWindow } from "../hooks/useWindow";
 import { getWordOfTheDay, isValidWord } from "../service/request";
 import Modal from "./modal";
+import Keyboard from "./keyboard";
 
 import styles from "./wordle.module.scss";
 
@@ -53,28 +54,34 @@ export default function Wordle() {
     }, []);
 
     function handleKeyDown(event: KeyboardEvent){
-        const letter = event.key.toUpperCase();
+        const key = event.key.toUpperCase();
 
-        if (gameStatus !== GameStatus.Playing) {
-            return;
-        }
-
-        if(event.key === 'Backspace' && currentWord.length > 0){
-                onDelete();
-            return;
-        }
-        if(event.key === 'Enter' && currentWord.length === 5 && turn <= 6){
-                onEnter();
-            return;
-        }
-        if(currentWord.length >= 5) return;
-        
-        //ingresar letra al estado
-        if(keys.includes(letter)){
-                onInput(letter);
-            return;
-        }
+        onKeyPressed(key);
     }
+
+    function onKeyPressed(key: string) {
+        if (gameStatus !== GameStatus.Playing) {
+          return;
+        }
+    
+        if (key === "BACKSPACE" && currentWord.length > 0) {
+          onDelete();
+          return;
+        }
+    
+        if (key === "ENTER" && currentWord.length === 5 && turn <= 6) {
+          onEnter();
+          return;
+        }
+    
+        if (currentWord.length >= 5) return;
+    
+        // ingresar la letra al estado
+        if (keys.includes(key)) {
+          onInput(key);
+          return;
+        }
+      }
 
     function onInput(letter: string){
         const newWord = currentWord + letter;
@@ -134,7 +141,7 @@ export default function Wordle() {
 
     <div className={styles.mainContainer}>
         {completedWords.map((word, i) => (
-            <RowCompleted word={word} solution={wordOfTheDay} />
+            <RowCompleted word={word} solution={wordOfTheDay} key={i} />
         ))}
 
         {gameStatus === GameStatus.Playing ? (
@@ -145,6 +152,7 @@ export default function Wordle() {
         ))}
         
     </div>
+    <Keyboard keys={keys} onKeyPressed={onKeyPressed} />
     </>
     );
 }
